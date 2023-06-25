@@ -1,0 +1,27 @@
+[HttpPost]
+        [ValidateAntiForgeryToken]
+		public IActionResult SendMail(string name, string email, string subject, string message)
+		{
+			try
+			{
+				var mailMessage = new MailMessage();
+				mailMessage.From = new MailAddress("test@test.com");
+				mailMessage.To.Add("test@test.com");
+				mailMessage.Subject = subject;
+				mailMessage.IsBodyHtml = true;
+				mailMessage.Body = $"<p>From: {name} </p><p>Email: {email}</p><p>Subject: {subject}</p><br><p>{message}</p>";
+
+				var smtpClient = new SmtpClient("outlook.office365.com", 587);
+				smtpClient.UseDefaultCredentials = false;
+				smtpClient.Credentials = new NetworkCredential("test@test.com", "test123");
+				smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+				smtpClient.EnableSsl = true;
+				smtpClient.Send(mailMessage);
+
+				return Json(new { success = true });
+			}
+			catch (Exception ex)
+			{
+				return Json(new { success = false, error = ex.Message });
+			}
+		}
